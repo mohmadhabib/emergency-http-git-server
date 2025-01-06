@@ -19,7 +19,7 @@ git clone https://github.com/mohmadhabib/emergency-http-git-server
 cd emergency-http-git-server
 
 # Run it
-python3 server.py # OR make run
+python3 server.py data/repos # OR make run
 ```
 
 
