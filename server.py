@@ -1,6 +1,88 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""Usage::
+
+    python3 server.py [DOCROOT]
+
+        DOCROOT
+            Path to root URI exposed by server, commonly /var/www/html;
+            defaults to current working directory; repo names must end
+            in dot git, e.g., /var/www/html/repos/foo.git
+
+
+    Environment options:
+
+        GITSRV_PREFIX <str>
+            Prefix for the following env vars; defaults to _ (shown)
+
+        _HOST <hostname>
+            IP address or hostname; defaults to localhost
+
+        _PORT <port>
+            Port number; defaults to 8000 (may need to be above 1023)
+
+        _LOGFILE <path>
+            Redirect all server messages (from standard error) to disk;
+            <path> need not exist and is truncated at startup
+
+        _DEBUG
+            Print verbose logging info for every request/response
+
+        _ALLOW_CREATION
+            Allow initializing of bare repo via POST; defaults to true.
+            Response is 201 on success::
+
+            $ curl --data init=1 http://localhost:8000/git_root/myrepo.git
+
+            As with existing repos, these must end in ".git".  Note: HEAD is
+            currently left unset.
+
+        _USE_NAMESPACES
+            Interpret non-existent path components between DOCROOT/real
+            and the target repo (exclusive) as $GIT_NAMESPACE, e.g.,
+            /var/www/html/git_root/$GIT_NAMESPACE/myrepo.git; see
+            gitnamespaces(7)
+
+        _AUTHFILE <path|str>
+            Enforce "basic access" authentication. This can either be an
+            absolute path to a .json file or a stringified json-style
+            "object" with these fields:
+            {
+              "/some/path/below/docroot": {
+                "description": STR, optional message for realm challenge
+                "secretsfile": STR, required abs path to .htpasswd-like file
+                "privaterepo": BOOL, optional; deny public read access
+              }, ...
+            }
+
+        _CERTFILE <path>
+            Path to an x509 cert in PEM format or a combined cert plus RSA
+            key (which must appear first). If the path is valid, the server
+            will listen on port 4443 (if PORT is 8000 or not specified).
+            Note: certificate chains must end with a root cert.
+
+        _KEYFILE <path>
+            Path to a valid RSA key in PEM format. If absent, CERTFILE must
+            contain the key.
+
+        _DHPARAMS <path>
+            Path to an optional DH parameter file, also in PEM format.
+
+Notes
+-----
+
+This is a minimal, synchronous Git HTTP server for quick chores, local
+experiments, and Git tutorials. Production use should not be attempted, even
+even when isolated from the open web. Opt instead for a pro-quality "app,"
+many of which are only a ``docker-run`` away.
+
+"""
+# Author: MohmadHabib
+# License: Apache License 2.0
+# Portions derived from Python modules may apply other terms.
+# See <https://docs.python.org/3.5/license.html> for details.
+
 
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -31,7 +113,7 @@ else:
     else:
         from http.server import ThreadingHTTPServer as _HTTPServer
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 config = {
     "DOCROOT": "/tmp/__fake__",
