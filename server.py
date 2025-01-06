@@ -651,11 +651,8 @@ class HTTPBackendHandler(CGIHTTPRequestHandler, object):
     def _get_htpasswd_info(self, lines):
         """Given .htpasswd lines, return dict of user/pass k/v pairs"""
         secdict = {}
-        for line in lines:
-            if ":" not in line:
-                continue
-            u, p = line.split(":")
-            secdict[u.strip()] = p.strip()
+        u, p = lines.split(":")
+        secdict[u.strip()] = p.strip()
         return secdict
 
     def handle_auth(self):
@@ -705,9 +702,7 @@ class HTTPBackendHandler(CGIHTTPRequestHandler, object):
 
         try:
             secretsfile = realm_info.get("secretsfile")
-            with open(secretsfile) as f:
-                secretlines = f.readlines()
-            secdict = self._get_htpasswd_info(secretlines)
+            secdict = self._get_htpasswd_info(secretsfile)
         except Exception:
             self.log_exception("E: Problem reading .htpasswd file")
             self.send_error(

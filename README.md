@@ -60,7 +60,7 @@ emergency-http-git-server
 2. git
 
 ## TODO:
-- [ ] Simplify Auth using only auth.json
+- [x] Simplify Auth using only auth.json
 - [ ] Add Extra POST Functionality (adduser, deluser, changeprivate)
 - [ ] (Not Planned) add simple git frontend
 - [ ] (Experment) bundle all files in Single File

@@ -12,17 +12,19 @@ export _AUTHFILE=../auth.json
 run:
 	@python3 server.py ./data/repos	
 clean:
-	@rm -rf ./data/repos/* && echo "" > ./data/logs/log
+	@rm -rf ./data/repos/* && echo "" > ./data/log
 create:
 	@curl -s -u user:pass --data init=1 http://localhost:8000/user/test.git
-create-simple:
-	@curl -s --data init=1 http://localhost:8000/mknh/test.git
+create2:
+	@curl -s -u user2:pass2 --data init=1 http://localhost:8000/user2/test.git
+create-root:
+	@curl -s --data init=1 http://localhost:8000/test.git
 clone:
 	@git clone http://localhost:8000/user/test.git
-clone-simple:
+clone2:
 	@git clone http://localhost:8000/test.git
 list:
-	@curl -v -u user:user --data list=1 http://localhost:8000/user/
-list-simple:
-	@curl -v -u root:strongpass --data list=1 http://localhost:8000/
+	@curl -v -u user:pass --data list=1 http://localhost:8000/user/
+list2:
+	@curl -v -u user2:pass2 --data list=1 http://localhost:8000/user2/
 
