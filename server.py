@@ -353,13 +353,11 @@ def create_repo_from_uri(abspath):
     if len(os.listdir(abspath)) != 0:
         raise RuntimeError("Leaf not empty: %s" % abspath)
     check_output(("git", "-C", abspath, "init", "--bare"))
-    check_output(("cp","../hooks/post-receive",abspath+"/hooks/post-receive"))
-    check_output(("chmod","+x",abspath+"/hooks/post-receive"))
-    return True
+    return add_hook(abspath)
 
 def list_repos(namespace):
     try:
-        repos = os.listdir(namespace)
+        repos = sorted((f for f in os.listdir(namespace) if not f.startswith(".")), key=str.lower)
     except Exception as err:
         try:
             if not isinstance(err, FileExistsError):
@@ -367,8 +365,34 @@ def list_repos(namespace):
         except NameError:  # 2.7
             if not isinstance(err, OSError) or err.errno != os.errno.EEXIST:
                 raise
-    return repos
+    return ','.join(repos)
 
+def add_hook(path):
+  post_receive = """#!/usr/bin/env bash
+
+while read oldrev newrev ref
+do
+    if [[ $ref =~ .*/(main|master)$ ]];
+    then
+        TARGET=$(mktemp -d)
+        git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f
+        cd $TARGET
+        if [[ -f ".deploy" ]]; then
+          echo "Deploying Now!!"
+          make -f .deploy
+        else
+          rm -rf $TARGET
+          echo "Nothing To Deploy"
+        fi
+    else
+        echo "Ref $ref received. Doing nothing: only the main or master branches may be deployed on this server."
+    fi
+done
+  """
+  with open(path+"/hooks/post-receive","w") as hookf:
+    hookf.write(post_receive)
+  return check_output(("chmod","+x",path+"/hooks/post-receive"))
+    
 
 def verify_pass(saved, received):
     """Attempt to compare .htpasswd file entry to the sent password
@@ -630,7 +654,7 @@ class HTTPBackendHandler(CGIHTTPRequestHandler, object):
         config["DEBUG"] and self.dlog(
             "git-list", stdout=_stdout, new_repo=abspath
         )
-        self._send_response_with_header(200,'Listed',str(_stdout))
+        self._send_response_with_header(200,'Listed',_stdout)
         
         return True
 

@@ -61,6 +61,7 @@ emergency-http-git-server
 
 ## TODO:
 - [x] Simplify Auth using only auth.json
+- [x] Auto Deploy (post-receive) hook internaly
 - [ ] Add Extra POST Functionality (adduser, deluser, changeprivate)
 - [ ] (Not Planned) add simple git frontend
 - [ ] (Experment) bundle all files in Single File

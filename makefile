@@ -27,4 +27,5 @@ list:
 	@curl -v -u user:pass --data list=1 http://localhost:8000/user/
 list2:
 	@curl -v -u user2:pass2 --data list=1 http://localhost:8000/user2/
-
+list-root:
+	@curl -v --data list=1 http://localhost:8000/
